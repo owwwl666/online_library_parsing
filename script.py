@@ -3,9 +3,12 @@ from pathvalidate import sanitize_filename
 import requests
 from pathlib import Path
 from bs4 import BeautifulSoup
+from urllib.parse import urljoin
 
 books_folder = "books"
+images_folder = "images"
 pathlib.Path(books_folder).mkdir(parents=True, exist_ok=True)
+pathlib.Path(images_folder).mkdir(parents=True, exist_ok=True)
 
 
 def check_for_redirect(response):
@@ -14,11 +17,24 @@ def check_for_redirect(response):
 
 
 def download_txt(book_link, book_id, folder):
-    soup = BeautifulSoup(requests.get(book_link).text, 'lxml')
+    html_text = requests.get(book_link).text
+    soup = BeautifulSoup(html_text, 'lxml')
     filename = soup.find(id="content").find("h1").text.split('::')[0].strip()
     book_name = sanitize_filename(filename)
-    book = Path(folder).joinpath(f"{book_id}.{book_name}.txt")
-    return book
+    book_path = Path(folder).joinpath(f"{book_id}.{book_name}.txt")
+    return book_path
+
+
+def download_image(book_link, book_id, folder):
+    html_text = requests.get(book_link).text
+    soup = BeautifulSoup(html_text, 'lxml')
+    img_path = soup.find(class_="bookimage").find("img")["src"]
+    url_book_img_path = urljoin("https://tululu.org", img_path)
+    image_download = requests.get(url_book_img_path)
+    image_name = url_book_img_path.split('/')[-1]
+    book_img_path = Path(folder).joinpath(f"{image_name}")
+    with open(book_img_path, 'wb') as file:
+        file.write(image_download.content)
 
 
 for id in range(1, 11):
@@ -29,11 +45,17 @@ for id in range(1, 11):
     except requests.exceptions.HTTPError:
         continue
     else:
-        book = download_txt(
+        book_content_path = download_txt(
             book_link=f'https://tululu.org/b{id}/',
             book_id=id,
             folder=books_folder
         )
 
-        with open(book, 'wb') as file:
+        download_image(
+            book_link=f'https://tululu.org/b{id}/',
+            book_id=id,
+            folder=images_folder
+        )
+
+        with open(book_content_path, 'wb') as file:
             file.write(response.content)
