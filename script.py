@@ -25,7 +25,7 @@ def download_txt(book_link, book_id, folder):
     return book_path
 
 
-def download_image(book_link, book_id, folder):
+def download_image(book_link, folder):
     html_text = requests.get(book_link).text
     soup = BeautifulSoup(html_text, 'lxml')
     img_path = soup.find(class_="bookimage").find("img")["src"]
@@ -53,7 +53,6 @@ for id in range(1, 11):
 
         download_image(
             book_link=f'https://tululu.org/b{id}/',
-            book_id=id,
             folder=images_folder
         )
 
