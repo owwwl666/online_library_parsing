@@ -37,6 +37,14 @@ def download_image(book_link, folder):
         file.write(image_download.content)
 
 
+def download_comment(book_link):
+    html_text = requests.get(book_link).text
+    soup = BeautifulSoup(html_text, 'lxml')
+    book_comments = soup.find_all(class_="texts")
+    for book_comment in book_comments:
+        print(book_comment.find(class_="black").text, end=print())
+
+
 for id in range(1, 11):
     book_download_link = f'https://tululu.org/txt.php?id={id}'
     response = requests.get(book_download_link, allow_redirects=False)
@@ -54,6 +62,10 @@ for id in range(1, 11):
         download_image(
             book_link=f'https://tululu.org/b{id}/',
             folder=images_folder
+        )
+
+        download_comment(
+            book_link=f'https://tululu.org/b{id}/'
         )
 
         with open(book_content_path, 'wb') as file:
