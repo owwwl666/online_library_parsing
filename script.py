@@ -45,6 +45,18 @@ def download_comment(book_link):
         print(book_comment.find(class_="black").text, end=print())
 
 
+def download_genre(book_link):
+    html_text = requests.get(book_link).text
+    soup = BeautifulSoup(html_text, 'lxml')
+    book_name = soup.find(id="content").find("h1").text.split('::')[0].strip()
+    book_genres = soup.find("span", class_="d_book").find_all("a")
+    genres = [book_genre.text for book_genre in book_genres]
+    return (
+        f'Заголовок: {book_name}',
+        genres
+    )
+
+
 for id in range(1, 11):
     book_download_link = f'https://tululu.org/txt.php?id={id}'
     response = requests.get(book_download_link, allow_redirects=False)
@@ -67,6 +79,12 @@ for id in range(1, 11):
         download_comment(
             book_link=f'https://tululu.org/b{id}/'
         )
+
+        name, genre = download_genre(
+            book_link=f'https://tululu.org/b{id}/'
+        )
+
+        print(name, '\n', genre, end=print())
 
         with open(book_content_path, 'wb') as file:
             file.write(response.content)
