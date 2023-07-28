@@ -1,10 +1,17 @@
 import pathlib
-from pathvalidate import sanitize_filename
 import requests
+import argparse
+from pathvalidate import sanitize_filename
 from pathlib import Path
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from environs import Env
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-start", "--start_id", type=int, required=False, default=1)
+parser.add_argument("-end", "--end_id", type=int, required=False, default=10)
+
+args = parser.parse_args()
 
 env = Env()
 env.read_env()
@@ -28,8 +35,7 @@ def parse_book_page(book_link):
     html_text = requests.get(book_link).text
     soup = BeautifulSoup(html_text, 'lxml')
     book = soup.find(id="content").find("h1").text.split('::')
-    book_name = book[0].strip()
-    book_author = book[1].strip()
+    book_name, book_author = book[0].strip(), book[1].strip()
     book_image = urljoin(
         "https://tululu.org",
         soup.find(class_="bookimage").find("img")["src"]
@@ -74,7 +80,7 @@ def download_genre(book_name, book_genres):
     )
 
 
-for id in range(1, 11):
+for id in range(args.start_id, args.end_id + 1):
     book_download_link = f'https://tululu.org/txt.php?id={id}'
     response = requests.get(book_download_link, allow_redirects=False)
     try:
