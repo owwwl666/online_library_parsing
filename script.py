@@ -4,11 +4,19 @@ import requests
 from pathlib import Path
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
+from environs import Env
 
-books_folder = "books"
-images_folder = "images"
-pathlib.Path(books_folder).mkdir(parents=True, exist_ok=True)
-pathlib.Path(images_folder).mkdir(parents=True, exist_ok=True)
+env = Env()
+env.read_env()
+
+paths = {
+    "books": env.str("BOOKS"),
+    "images": env.str("IMAGES"),
+    "comments": env.str("COMMENTS")
+}
+
+for path in paths:
+    pathlib.Path(paths[path]).mkdir(parents=True, exist_ok=True)
 
 
 def check_for_redirect(response):
@@ -16,40 +24,49 @@ def check_for_redirect(response):
         raise requests.exceptions.HTTPError
 
 
-def download_txt(book_link, book_id, folder):
+def parse_book_page(book_link):
     html_text = requests.get(book_link).text
     soup = BeautifulSoup(html_text, 'lxml')
-    filename = soup.find(id="content").find("h1").text.split('::')[0].strip()
-    book_name = sanitize_filename(filename)
-    book_path = Path(folder).joinpath(f"{book_id}.{book_name}.txt")
+    book = soup.find(id="content").find("h1").text.split('::')
+    book_name = book[0].strip()
+    book_author = book[1].strip()
+    book_image = urljoin(
+        "https://tululu.org",
+        soup.find(class_="bookimage").find("img")["src"]
+    )
+    book_comments = soup.find_all(class_="texts")
+    book_genres = soup.find("span", class_="d_book").find_all("a")
+    return {
+        "Заголовок": book_name,
+        "Автор": book_author,
+        "Обложка": book_image,
+        "Комментарии": book_comments,
+        "Жанры": book_genres
+    }
+
+
+def download_txt(book_id, book_name, folder):
+    name = sanitize_filename(book_name)
+    book_path = Path(folder).joinpath(f"{book_id}.{name}.txt")
     return book_path
 
 
-def download_image(book_link, folder):
-    html_text = requests.get(book_link).text
-    soup = BeautifulSoup(html_text, 'lxml')
-    img_path = soup.find(class_="bookimage").find("img")["src"]
-    url_book_img_path = urljoin("https://tululu.org", img_path)
-    image_download = requests.get(url_book_img_path)
-    image_name = url_book_img_path.split('/')[-1]
-    book_img_path = Path(folder).joinpath(f"{image_name}")
-    with open(book_img_path, 'wb') as file:
+def download_image(book_image, folder):
+    image_download = requests.get(book_image)
+    image_name = book_image.split('/')[-1]
+    book_image_path = Path(folder).joinpath(f"{image_name}")
+    with open(book_image_path, 'wb') as file:
         file.write(image_download.content)
 
 
-def download_comment(book_link):
-    html_text = requests.get(book_link).text
-    soup = BeautifulSoup(html_text, 'lxml')
-    book_comments = soup.find_all(class_="texts")
+def download_comment(book_id, book_name, book_comments, folder):
+    book_comments_path = Path(folder).joinpath(f"{book_id}.{book_name}.txt")
     for book_comment in book_comments:
-        print(book_comment.find(class_="black").text, end=print())
+        with open(book_comments_path, 'a') as file:
+            file.write(f'{book_comment.find(class_="black").text}\n')
 
 
-def download_genre(book_link):
-    html_text = requests.get(book_link).text
-    soup = BeautifulSoup(html_text, 'lxml')
-    book_name = soup.find(id="content").find("h1").text.split('::')[0].strip()
-    book_genres = soup.find("span", class_="d_book").find_all("a")
+def download_genre(book_name, book_genres):
     genres = [book_genre.text for book_genre in book_genres]
     return (
         f'Заголовок: {book_name}',
@@ -65,26 +82,32 @@ for id in range(1, 11):
     except requests.exceptions.HTTPError:
         continue
     else:
+        book_data = parse_book_page(book_link=f'https://tululu.org/b{id}/')
+
         book_content_path = download_txt(
-            book_link=f'https://tululu.org/b{id}/',
             book_id=id,
-            folder=books_folder
+            book_name=book_data["Заголовок"],
+            folder=paths["books"]
         )
-
-        download_image(
-            book_link=f'https://tululu.org/b{id}/',
-            folder=images_folder
-        )
-
-        download_comment(
-            book_link=f'https://tululu.org/b{id}/'
-        )
-
-        name, genre = download_genre(
-            book_link=f'https://tululu.org/b{id}/'
-        )
-
-        print(name, '\n', genre, end=print())
 
         with open(book_content_path, 'wb') as file:
             file.write(response.content)
+
+        download_image(
+            book_image=book_data["Обложка"],
+            folder=paths["images"]
+        )
+
+        download_comment(
+            book_id=id,
+            book_name=book_data["Заголовок"],
+            book_comments=book_data["Комментарии"],
+            folder=paths["comments"]
+        )
+
+        name, genres = download_genre(
+            book_name=book_data["Заголовок"],
+            book_genres=book_data["Жанры"]
+        )
+
+        print(name, '\n', genres, end=print())
