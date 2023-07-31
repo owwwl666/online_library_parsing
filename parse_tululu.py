@@ -37,8 +37,8 @@ def parse_book_page(html_content, book_link):
     }
 
 
-def download_txt(book_id, book_name, folder):
-    """Скачивает текст книги."""
+def specifies_save_path_txt(book_id, book_name, folder):
+    """Задает путь сохранения текста книги."""
     name = sanitize_filename(book_name)
     book_path = Path(folder).joinpath(f'{book_id}.{name}.txt')
     return book_path
@@ -61,13 +61,10 @@ def download_comment(book_id, book_name, book_comments, folder):
             file.write(f'{book_comment.find(class_="black").text}\n')
 
 
-def download_genre(book_name, book_genres):
-    """Возвращает кортеж в виде заголовка и жанра книги."""
+def returns_genres(book_genres):
+    """Возвращает список со всеми жанрами книги."""
     genres = [book_genre.text for book_genre in book_genres]
-    return (
-        f'Заголовок: {book_name}',
-        genres
-    )
+    return genres
 
 
 def main():
@@ -108,7 +105,7 @@ def main():
                 book_link=book_link
             )
 
-            book_content_path = download_txt(
+            book_content_path = specifies_save_path_txt(
                 book_id=book_id,
                 book_name=book_information["header"],
                 folder=paths["books_path"]
@@ -129,12 +126,11 @@ def main():
                 folder=paths["comments_path"]
             )
 
-            name, genres = download_genre(
-                book_name=book_information["header"],
+            genres = returns_genres(
                 book_genres=book_information["genres"]
             )
 
-            print(name, '\n', genres, end=print())
+            print(book_information["header"], '\n', genres, end=print())
 
 
 if __name__ == '__main__':
