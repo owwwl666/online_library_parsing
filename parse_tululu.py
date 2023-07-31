@@ -86,9 +86,9 @@ def main():
     env.read_env()
 
     paths = {
-        "books": env.str("BOOKS"),
-        "images": env.str("IMAGES"),
-        "comments": env.str("COMMENTS")
+        "books_path": env.str("BOOKS"),
+        "images_path": env.str("IMAGES"),
+        "comments_path": env.str("COMMENTS")
     }
 
     for path in paths:
@@ -107,7 +107,7 @@ def main():
             book_content_path = download_txt(
                 book_id=id,
                 book_name=book_data["Заголовок"],
-                folder=paths["books"]
+                folder=paths["books_path"]
             )
 
             with open(book_content_path, 'wb') as file:
@@ -115,14 +115,14 @@ def main():
 
             download_image(
                 book_image=book_data["Обложка"],
-                folder=paths["images"]
+                folder=paths["images_path"]
             )
 
             download_comment(
                 book_id=id,
                 book_name=book_data["Заголовок"],
                 book_comments=book_data["Комментарии"],
-                folder=paths["comments"]
+                folder=paths["comments_path"]
             )
 
             name, genres = download_genre(
