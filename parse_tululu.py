@@ -47,6 +47,7 @@ def specifies_save_path_txt(book_id, book_name, folder):
 def download_image(book_image, folder):
     """Скачивает обложку книги."""
     image_download = requests.get(book_image)
+    image_download.raise_for_status()
     image_name = book_image.split("/")[-1]
     book_image_path = Path(folder).joinpath(f'{image_name}')
     with open(book_image_path, 'wb') as file:
