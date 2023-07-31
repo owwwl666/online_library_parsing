@@ -102,11 +102,11 @@ def main():
         except requests.exceptions.HTTPError:
             continue
         else:
-            book_data = parse_book_page(book_link=f'https://tululu.org/b{book_id}/')
+            book_information = parse_book_page(book_link=f'https://tululu.org/b{book_id}/')
 
             book_content_path = download_txt(
                 book_id=book_id,
-                book_name=book_data["Заголовок"],
+                book_name=book_information["Заголовок"],
                 folder=paths["books_path"]
             )
 
@@ -114,20 +114,20 @@ def main():
                 file.write(response.content)
 
             download_image(
-                book_image=book_data["Обложка"],
+                book_image=book_information["Обложка"],
                 folder=paths["images_path"]
             )
 
             download_comment(
                 book_id=book_id,
-                book_name=book_data["Заголовок"],
-                book_comments=book_data["Комментарии"],
+                book_name=book_information["Заголовок"],
+                book_comments=book_information["Комментарии"],
                 folder=paths["comments_path"]
             )
 
             name, genres = download_genre(
-                book_name=book_data["Заголовок"],
-                book_genres=book_data["Жанры"]
+                book_name=book_information["Заголовок"],
+                book_genres=book_information["Жанры"]
             )
 
             print(name, '\n', genres, end=print())
