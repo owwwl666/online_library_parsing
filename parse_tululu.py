@@ -57,9 +57,13 @@ def download_image(book_image, folder):
 def download_comments(book_id, book_name, book_comments, folder):
     """Скачивает отзывы и комментарии о книге."""
     book_comments_path = Path(folder).joinpath(f'{book_id}.{book_name}.txt')
+    comments = []
+
     for book_comment in book_comments:
-        with open(book_comments_path, 'a') as file:
-            file.write(f'{book_comment.find(class_="black").text}\n')
+        comments.append(book_comment.find(class_="black").text)
+
+    with open(book_comments_path, 'w') as file:
+        file.writelines(f'{comment}\n' for comment in comments)
 
 
 def returns_genres(book_genres):
