@@ -29,11 +29,11 @@ def parse_book_page(html_content, book_link):
     book_comments = soup.find_all(class_="texts")
     book_genres = soup.find("span", class_="d_book").find_all("a")
     return {
-        "Заголовок": book_name,
-        "Автор": book_author,
-        "Обложка": book_image,
-        "Комментарии": book_comments,
-        "Жанры": book_genres
+        "header": book_name,
+        "author": book_author,
+        "cover": book_image,
+        "comments": book_comments,
+        "genres": book_genres
     }
 
 
@@ -110,7 +110,7 @@ def main():
 
             book_content_path = download_txt(
                 book_id=book_id,
-                book_name=book_information["Заголовок"],
+                book_name=book_information["header"],
                 folder=paths["books_path"]
             )
 
@@ -118,20 +118,20 @@ def main():
                 file.write(response.content)
 
             download_image(
-                book_image=book_information["Обложка"],
+                book_image=book_information["cover"],
                 folder=paths["images_path"]
             )
 
             download_comment(
                 book_id=book_id,
-                book_name=book_information["Заголовок"],
-                book_comments=book_information["Комментарии"],
+                book_name=book_information["header"],
+                book_comments=book_information["comments"],
                 folder=paths["comments_path"]
             )
 
             name, genres = download_genre(
-                book_name=book_information["Заголовок"],
-                book_genres=book_information["Жанры"]
+                book_name=book_information["header"],
+                book_genres=book_information["genres"]
             )
 
             print(name, '\n', genres, end=print())
