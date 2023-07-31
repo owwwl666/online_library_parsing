@@ -14,13 +14,12 @@ def check_for_redirect(response):
         raise requests.exceptions.HTTPError
 
 
-def parse_book_page(book_link):
+def parse_book_page(html_content):
     """Обрабатывает html-контент страницы с книгой.
 
     Возвращает словарь с основной информацией о книге.
     """
-    html_text = requests.get(book_link).text
-    soup = BeautifulSoup(html_text, 'lxml')
+    soup = BeautifulSoup(html_content, 'lxml')
     book = soup.find(id="content").find("h1").text.split('::')
     book_name, book_author = book[0].strip(), book[1].strip()
     book_image = urljoin(
@@ -102,7 +101,9 @@ def main():
         except requests.exceptions.HTTPError:
             continue
         else:
-            book_information = parse_book_page(book_link=f'https://tululu.org/b{book_id}/')
+            book_link = f'https://tululu.org/b{book_id}/'
+            html_content = requests.get(book_link).text
+            book_information = parse_book_page(html_content=html_content)
 
             book_content_path = download_txt(
                 book_id=book_id,
