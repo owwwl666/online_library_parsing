@@ -94,18 +94,18 @@ def main():
     for path in paths:
         pathlib.Path(paths[path]).mkdir(parents=True, exist_ok=True)
 
-    for id in range(args.start_id, args.end_id + 1):
-        book_download_link = f'https://tululu.org/txt.php?id={id}'
+    for book_id in range(args.start_id, args.end_id + 1):
+        book_download_link = f'https://tululu.org/txt.php?id={book_id}'
         response = requests.get(book_download_link, allow_redirects=False)
         try:
             check_for_redirect(response=response.status_code)
         except requests.exceptions.HTTPError:
             continue
         else:
-            book_data = parse_book_page(book_link=f'https://tululu.org/b{id}/')
+            book_data = parse_book_page(book_link=f'https://tululu.org/b{book_id}/')
 
             book_content_path = download_txt(
-                book_id=id,
+                book_id=book_id,
                 book_name=book_data["Заголовок"],
                 folder=paths["books_path"]
             )
@@ -119,7 +119,7 @@ def main():
             )
 
             download_comment(
-                book_id=id,
+                book_id=book_id,
                 book_name=book_data["Заголовок"],
                 book_comments=book_data["Комментарии"],
                 folder=paths["comments_path"]
