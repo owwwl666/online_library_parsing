@@ -95,8 +95,8 @@ def main():
         pathlib.Path(paths[path]).mkdir(parents=True, exist_ok=True)
 
     for book_id in range(args.start_id, args.end_id + 1):
-        book_download_link = f'https://tululu.org/txt.php?id={book_id}'
-        response = requests.get(book_download_link, allow_redirects=False)
+        book_download_link = f'https://tululu.org/txt.php'
+        response = requests.get(book_download_link, allow_redirects=False, params={"?": "", "id": book_id})
         try:
             check_for_redirect(response=response.status_code)
         except requests.exceptions.HTTPError:
