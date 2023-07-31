@@ -54,7 +54,7 @@ def download_image(book_image, folder):
         file.write(image_download.content)
 
 
-def download_comment(book_id, book_name, book_comments, folder):
+def download_comments(book_id, book_name, book_comments, folder):
     """Скачивает отзывы и комментарии о книге."""
     book_comments_path = Path(folder).joinpath(f'{book_id}.{book_name}.txt')
     for book_comment in book_comments:
@@ -120,7 +120,7 @@ def main():
                 folder=paths["images_path"]
             )
 
-            download_comment(
+            download_comments(
                 book_id=book_id,
                 book_name=book_information["header"],
                 book_comments=book_information["comments"],
