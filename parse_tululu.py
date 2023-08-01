@@ -1,4 +1,4 @@
-import pathlib
+import logging
 import requests
 import argparse
 from pathvalidate import sanitize_filename
@@ -67,10 +67,11 @@ def download_comments(book_id, book_name, book_comments, folder):
         file.writelines(f'{comment}\n' for comment in comments)
 
 
-def returns_genres(book_genres):
-    """Возвращает список со всеми жанрами книги."""
+def download_genres(book_genres, book_name):
+    """Скачивает и сохраняет в файл genres.txt название и все жанры книги."""
     genres = [book_genre.text for book_genre in book_genres]
-    return genres
+    with open('genres.txt', 'a') as file:
+        file.writelines(f'{book_name}\n{genres}\n')
 
 
 def main():
@@ -90,11 +91,11 @@ def main():
     paths = {
         "books_path": env.str("BOOKS"),
         "images_path": env.str("IMAGES"),
-        "comments_path": env.str("COMMENTS")
+        "comments_path": env.str("COMMENTS"),
     }
 
     for path in paths:
-        pathlib.Path(paths[path]).mkdir(parents=True, exist_ok=True)
+        Path(paths[path]).mkdir(parents=True, exist_ok=True)
 
     for book_id in range(args.start_id, args.end_id + 1):
         book_download_link = f'https://tululu.org/txt.php'
@@ -130,11 +131,12 @@ def main():
                 folder=paths["comments_path"]
             )
 
-            genres = returns_genres(
-                book_genres=book_information["genres"]
+            download_genres(
+                book_name=book_information["header"],
+                book_genres=book_information["genres"],
             )
 
-            print(book_information["header"], '\n', genres, end=print())
+            # print(book_information["header"], '\n', genres, end=print())
 
 
 if __name__ == '__main__':
