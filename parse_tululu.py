@@ -1,4 +1,5 @@
 import logging
+import time
 import requests
 import argparse
 from pathvalidate import sanitize_filename
@@ -99,14 +100,18 @@ def main():
 
     for book_id in range(args.start_id, args.end_id + 1):
         book_download_link = f'https://tululu.org/txt.php'
-        response = requests.get(book_download_link, allow_redirects=False, params={"?": "", "id": book_id})
+        book_link = f'https://tululu.org/b{book_id}/'
         try:
+            response = requests.get(book_download_link, allow_redirects=False, params={"?": "", "id": book_id})
+            html_content = requests.get(book_link).text
             check_for_redirect(response=response.status_code)
         except requests.exceptions.HTTPError:
-            continue
+            logging.error(f'Книги по {book_id}-ому id не существует')
+        except requests.exceptions.ConnectionError:
+            logging.error(f'Не установлено соединение с сервером')
+            time.sleep(30)
         else:
-            book_link = f'https://tululu.org/b{book_id}/'
-            html_content = requests.get(book_link).text
+
             book_information = parse_book_page(
                 html_content=html_content,
                 book_link=book_link
@@ -135,8 +140,6 @@ def main():
                 book_name=book_information["header"],
                 book_genres=book_information["genres"],
             )
-
-            # print(book_information["header"], '\n', genres, end=print())
 
 
 if __name__ == '__main__':
