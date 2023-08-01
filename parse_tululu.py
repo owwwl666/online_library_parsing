@@ -37,11 +37,12 @@ def parse_book_page(html_content, book_link):
     }
 
 
-def specifies_save_path_txt(book_id, book_name, folder):
+def download_txt(response, book_id, book_name, folder):
     """Задает путь сохранения текста книги."""
     name = sanitize_filename(book_name)
     book_path = Path(folder).joinpath(f'{book_id}.{name}.txt')
-    return book_path
+    with open(book_path, 'wb') as file:
+        file.write(response)
 
 
 def download_image(book_image, folder):
@@ -110,14 +111,12 @@ def main():
                 book_link=book_link
             )
 
-            book_content_path = specifies_save_path_txt(
+            download_txt(
+                response=response.content,
                 book_id=book_id,
                 book_name=book_information["header"],
                 folder=paths["books_path"]
             )
-
-            with open(book_content_path, 'wb') as file:
-                file.write(response.content)
 
             download_image(
                 book_image=book_information["cover"],
