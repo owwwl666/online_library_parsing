@@ -11,7 +11,7 @@ from environs import Env
 
 def check_for_redirect(response):
     """Проверяет ответ http запроса."""
-    if response != 200:
+    if response:
         raise requests.exceptions.HTTPError
 
 
@@ -102,16 +102,15 @@ def main():
         book_download_link = f'https://tululu.org/txt.php'
         book_link = f'https://tululu.org/b{book_id}/'
         try:
-            response = requests.get(book_download_link, allow_redirects=False, params={"?": "", "id": book_id})
+            response = requests.get(book_download_link, allow_redirects=True, params={"?": "", "id": book_id})
             html_content = requests.get(book_link).text
-            check_for_redirect(response=response.status_code)
+            check_for_redirect(response=response.history)
         except requests.exceptions.HTTPError:
             logging.error(f'Книги по {book_id}-ому id не существует')
         except requests.exceptions.ConnectionError:
             logging.error(f'Не установлено соединение с сервером')
             time.sleep(30)
         else:
-
             book_information = parse_book_page(
                 html_content=html_content,
                 book_link=book_link
