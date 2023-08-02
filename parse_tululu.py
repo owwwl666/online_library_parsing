@@ -48,12 +48,19 @@ def download_txt(response, book_id, book_name, folder):
 
 def download_image(book_image, folder):
     """Скачивает обложку книги."""
-    image_download = requests.get(book_image)
-    image_download.raise_for_status()
-    image_name = book_image.split("/")[-1]
-    book_image_path = Path(folder).joinpath(f'{image_name}')
-    with open(book_image_path, 'wb') as file:
-        file.write(image_download.content)
+    try:
+        image_download = requests.get(book_image)
+        image_download.raise_for_status()
+    except requests.exceptions.HTTPError:
+        logging.error(f'Обложки книги не существует')
+    except requests.exceptions.ConnectionError:
+        logging.error(f'Не установлено соединение с сервером')
+        time.sleep(30)
+    else:
+        image_name = book_image.split("/")[-1]
+        book_image_path = Path(folder).joinpath(f'{image_name}')
+        with open(book_image_path, 'wb') as file:
+            file.write(image_download.content)
 
 
 def download_comments(book_id, book_name, book_comments, folder):
