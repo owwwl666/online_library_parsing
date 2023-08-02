@@ -104,7 +104,7 @@ def main():
         book_download_link = f'https://tululu.org/txt.php'
         book_link = f'https://tululu.org/b{book_id}/'
         try:
-            response = requests.get(book_download_link, allow_redirects=True, params={"?": "", "id": book_id})
+            response = requests.get(book_download_link, allow_redirects=True, params={"id": book_id})
             book_link__response = requests.get(book_link)
             response.raise_for_status()
             book_link__response.raise_for_status()
