@@ -105,14 +105,18 @@ def main():
         book_link = f'https://tululu.org/b{book_id}/'
         try:
             response = requests.get(book_download_link, allow_redirects=True, params={"?": "", "id": book_id})
-            html_content = requests.get(book_link).text
+            book_link__response = requests.get(book_link)
+            response.raise_for_status()
+            book_link__response.raise_for_status()
             check_for_redirect(response=response.history)
+            check_for_redirect(response=book_link__response.history)
         except requests.exceptions.HTTPError:
             logging.error(f'Книги по {book_id}-ому id не существует')
         except requests.exceptions.ConnectionError:
             logging.error(f'Не установлено соединение с сервером')
             time.sleep(30)
         else:
+            html_content = book_link__response.text
             book_information = parse_book_page(
                 html_content=html_content,
                 book_link=book_link
