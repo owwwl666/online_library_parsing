@@ -117,7 +117,7 @@ def main():
             time.sleep(30)
         else:
             html_content = book_link__response.text
-            book_information = parse_book_page(
+            book = parse_book_page(
                 html_content=html_content,
                 book_link=book_link
             )
@@ -125,25 +125,25 @@ def main():
             download_txt(
                 response=response.content,
                 book_id=book_id,
-                book_name=book_information["header"],
+                book_name=book["header"],
                 folder=paths["books_path"]
             )
 
             download_image(
-                book_image=book_information["cover"],
+                book_image=book["cover"],
                 folder=paths["images_path"]
             )
 
             download_comments(
                 book_id=book_id,
-                book_name=book_information["header"],
-                book_comments=book_information["comments"],
+                book_name=book["header"],
+                book_comments=book["comments"],
                 folder=paths["comments_path"]
             )
 
             download_genres(
-                book_name=book_information["header"],
-                book_genres=book_information["genres"],
+                book_name=book["header"],
+                book_genres=book["genres"],
             )
 
 
