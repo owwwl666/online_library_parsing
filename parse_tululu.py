@@ -77,8 +77,10 @@ def download_genres(book_genres, book_name):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Передача двух аргументов командной строке для скачивания \n"
-                    "заданных по id книг от start_id до end_id включительно")
+        description="Парсинг онлайн-библиотеки https://tululu.org/. "
+                    "Скрипт обрабатывает выбранные пользователям по id книги и "
+                    "скачивает с сайта всю необходимую информацию о ней: "
+                    "название, автора, обложку, жанр и т.д.")
     parser.add_argument("-start", "--start_id", type=int, required=False, default=1,
                         help="Целочисленный аргумент (начальный id книги)")
     parser.add_argument("-end", "--end_id", type=int, required=False, default=10,
