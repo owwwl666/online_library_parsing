@@ -21,8 +21,8 @@ def parse_book_page(html_content, book_link):
     Возвращает словарь с основной информацией о книге.
     """
     soup = BeautifulSoup(html_content, "lxml")
-    book = soup.find(id="content").find("h1").text.split("::")
-    book_name, book_author = book[0].strip(), book[1].strip()
+    book_parse = soup.find(id="content").find("h1").text.split("::")
+    book_name, book_author = book_parse[0].strip(), book_parse[1].strip()
     book_image = urljoin(
         book_link,
         soup.find(class_="bookimage").find("img")["src"]
@@ -48,19 +48,12 @@ def download_txt(response, book_id, book_name, folder):
 
 def download_image(book_image, folder):
     """Скачивает обложку книги."""
-    try:
-        image_download = requests.get(book_image)
-        image_download.raise_for_status()
-    except requests.exceptions.HTTPError:
-        logging.error(f'Обложки книги не существует')
-    except requests.exceptions.ConnectionError:
-        logging.error(f'Не установлено соединение с сервером')
-        time.sleep(30)
-    else:
-        image_name = book_image.split("/")[-1]
-        book_image_path = Path(folder).joinpath(f'{image_name}')
-        with open(book_image_path, 'wb') as file:
-            file.write(image_download.content)
+    image_download = requests.get(book_image)
+    image_download.raise_for_status()
+    image_name = book_image.split("/")[-1]
+    book_image_path = Path(folder).joinpath(f'{image_name}')
+    with open(book_image_path, 'wb') as file:
+        file.write(image_download.content)
 
 
 def download_comments(book_id, book_name, book_comments, folder):
@@ -108,34 +101,34 @@ def main():
         book_download_link = f'https://tululu.org/txt.php'
         book_link = f'https://tululu.org/b{book_id}/'
         try:
-            response = requests.get(book_download_link, allow_redirects=True, params={"id": book_id})
+            response = requests.get(book_download_link, params={"id": book_id})
             book_link__response = requests.get(book_link)
+
             response.raise_for_status()
             book_link__response.raise_for_status()
             check_for_redirect(response=response.history)
-            check_for_redirect(response=book_link__response.history)
-        except requests.exceptions.HTTPError:
-            logging.error(f'Книги по {book_id}-ому id не существует')
-        except requests.exceptions.ConnectionError:
-            logging.error(f'Не установлено соединение с сервером')
-            time.sleep(30)
-        else:
+
             html_content = book_link__response.text
             book = parse_book_page(
                 html_content=html_content,
                 book_link=book_link
             )
+            download_image(
+                book_image=book["cover"],
+                folder=paths["images_path"]
+            )
 
+        except requests.exceptions.HTTPError:
+            logging.error(f'Книги по {book_id}-ому id не существует')
+        except requests.exceptions.ConnectionError:
+            logging.error(f'Не установлено соединение с сервером')
+            time.sleep(5)
+        else:
             download_txt(
                 response=response.content,
                 book_id=book_id,
                 book_name=book["header"],
                 folder=paths["books_path"]
-            )
-
-            download_image(
-                book_image=book["cover"],
-                folder=paths["images_path"]
             )
 
             download_comments(
