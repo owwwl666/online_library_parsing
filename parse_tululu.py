@@ -38,7 +38,7 @@ def parse_book_page(html_content, book_link):
     }
 
 
-def download_txt(response, book_id, book_name, folder):
+def saves_txt(response, book_id, book_name, folder):
     """Задает путь сохранения текста книги."""
     name = sanitize_filename(book_name)
     book_path = Path(folder).joinpath(f'{book_id}.{name}.txt')
@@ -46,7 +46,7 @@ def download_txt(response, book_id, book_name, folder):
         file.write(response)
 
 
-def download_image(book_image, folder):
+def saves_image(book_image, folder):
     """Скачивает обложку книги."""
     image_download = requests.get(book_image)
     image_download.raise_for_status()
@@ -56,7 +56,7 @@ def download_image(book_image, folder):
         file.write(image_download.content)
 
 
-def download_comments(book_id, book_name, book_comments, folder):
+def saves_comments(book_id, book_name, book_comments, folder):
     """Скачивает отзывы и комментарии о книге."""
     book_comments_path = Path(folder).joinpath(f'{book_id}.{book_name}.txt')
     comments = [book_comment.find(class_="black").text for book_comment in book_comments]
@@ -65,7 +65,7 @@ def download_comments(book_id, book_name, book_comments, folder):
         file.writelines(f'{comment}\n' for comment in comments)
 
 
-def download_genres(book_genres, book_name):
+def saves_genres(book_genres, book_name):
     """Скачивает и сохраняет в файл genres.txt название и все жанры книги."""
     genres = [book_genre.text for book_genre in book_genres]
     with open('genres.txt', 'a') as file:
@@ -113,7 +113,7 @@ def main():
                 html_content=html_content,
                 book_link=book_link
             )
-            download_image(
+            saves_image(
                 book_image=book["cover"],
                 folder=paths["images_path"]
             )
@@ -124,21 +124,21 @@ def main():
             logging.error(f'Не установлено соединение с сервером')
             time.sleep(5)
         else:
-            download_txt(
+            saves_txt(
                 response=response.content,
                 book_id=book_id,
                 book_name=book["header"],
                 folder=paths["books_path"]
             )
 
-            download_comments(
+            saves_comments(
                 book_id=book_id,
                 book_name=book["header"],
                 book_comments=book["comments"],
                 folder=paths["comments_path"]
             )
 
-            download_genres(
+            saves_genres(
                 book_name=book["header"],
                 book_genres=book["genres"],
             )
