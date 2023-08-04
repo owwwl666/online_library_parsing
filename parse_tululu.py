@@ -101,12 +101,12 @@ def main():
         book_download_link = f'https://tululu.org/txt.php'
         book_link = f'https://tululu.org/b{book_id}/'
         try:
-            response = requests.get(book_download_link, params={"id": book_id})
+            response = requests.get(book_download_link, allow_redirects=False, params={"id": book_id})
             book_link__response = requests.get(book_link)
 
             response.raise_for_status()
             book_link__response.raise_for_status()
-            check_for_redirect(response=response.history)
+            check_for_redirect(response=response.is_redirect)
 
             html_content = book_link__response.text
             book = parse_book_page(
