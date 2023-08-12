@@ -63,6 +63,7 @@ def saves_comments(book_id, book_name, book_comments, folder):
 
     with open(book_comments_path, 'w') as file:
         file.writelines(f'{comment}\n' for comment in comments)
+    return comments
 
 
 def saves_genres(book_genres, book_name):
@@ -70,9 +71,10 @@ def saves_genres(book_genres, book_name):
     genres = [book_genre.text for book_genre in book_genres]
     with open('genres.txt', 'a') as file:
         file.writelines(f'{book_name}\n{genres}\n')
+    return genres
 
 
-def main():
+if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description="Парсинг онлайн-библиотеки https://tululu.org/. "
                     "Скрипт обрабатывает выбранные пользователям по id книги и "
@@ -143,7 +145,3 @@ def main():
                 book_name=book["header"],
                 book_genres=book["genres"],
             )
-
-
-if __name__ == '__main__':
-    main()
