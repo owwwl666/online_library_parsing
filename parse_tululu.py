@@ -21,14 +21,14 @@ def parse_book_page(html_content, book_link):
     Возвращает словарь с основной информацией о книге.
     """
     soup = BeautifulSoup(html_content, "lxml")
-    book_parse = soup.find(id="content").find("h1").text.split("::")
+    book_parse = soup.select_one('div[id="content"] h1').text.split('::')
     book_name, book_author = book_parse[0].strip(), book_parse[1].strip()
     book_image = urljoin(
         book_link,
-        soup.find(class_="bookimage").find("img")["src"]
+        soup.select_one('.bookimage img')['src']
     )
-    book_comments = soup.find_all(class_="texts")
-    book_genres = soup.find("span", class_="d_book").find_all("a")
+    book_comments = soup.select('.texts')
+    book_genres = soup.select_one('span.d_book').select('a')
     return {
         "header": book_name,
         "author": book_author,
@@ -59,7 +59,7 @@ def saves_image(book_image, folder):
 def saves_comments(book_id, book_name, book_comments, folder):
     """Скачивает отзывы и комментарии о книге."""
     book_comments_path = Path(folder).joinpath(f'{book_id}.{book_name}.txt')
-    comments = [book_comment.find(class_="black").text for book_comment in book_comments]
+    comments = [book_comment.select_one('.black').text for book_comment in book_comments]
 
     with open(book_comments_path, 'w') as file:
         file.writelines(f'{comment}\n' for comment in comments)
