@@ -38,11 +38,11 @@ for page in range(1, 2):
         time.sleep(10)
     else:
         soup = BeautifulSoup(response.text, 'lxml')
-        books = soup.find_all(class_='d_book')
+        books = soup.select('.d_book')
         for book in books:
             book_url = urljoin(
                 'https://tululu.org',
-                book.find('a')["href"]
+                book.select_one('a')['href']
             )
             book_id = urlparse(book_url).path[2:-1]
             book_download_link = f'https://tululu.org/txt.php'
