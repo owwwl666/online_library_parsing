@@ -2,6 +2,7 @@ import logging
 import time
 import requests
 import argparse
+import json
 from pathvalidate import sanitize_filename
 from pathlib import Path
 from bs4 import BeautifulSoup
@@ -56,21 +57,15 @@ def saves_image(book_image, folder):
         file.write(image_download.content)
 
 
-def saves_comments(book_id, book_name, book_comments, folder):
-    """Скачивает отзывы и комментарии о книге."""
-    book_comments_path = Path(folder).joinpath(f'{book_id}.{book_name}.txt')
+def get_comments(book_comments):
+    """Получает отзывы и комментарии о книге."""
     comments = [book_comment.select_one('.black').text for book_comment in book_comments]
-
-    with open(book_comments_path, 'w') as file:
-        file.writelines(f'{comment}\n' for comment in comments)
     return comments
 
 
-def saves_genres(book_genres, book_name):
-    """Скачивает и сохраняет в файл genres.txt название и все жанры книги."""
+def get_genres(book_genres):
+    """Получает все жанры книги."""
     genres = [book_genre.text for book_genre in book_genres]
-    with open('genres.txt', 'a') as file:
-        file.writelines(f'{book_name}\n{genres}\n')
     return genres
 
 
@@ -93,8 +88,9 @@ if __name__ == '__main__':
     paths = {
         "books_path": env.str("BOOKS"),
         "images_path": env.str("IMAGES"),
-        "comments_path": env.str("COMMENTS"),
     }
+
+    comments_genres = []
 
     for path in paths:
         Path(paths[path]).mkdir(parents=True, exist_ok=True)
@@ -133,15 +129,12 @@ if __name__ == '__main__':
                 book_name=book["header"],
                 folder=paths["books_path"]
             )
+            comments_genres.append({
+                'title': book["header"],
+                'comments': get_comments(book_comments=book["comments"]),
+                'genres': get_genres(book_genres=book["genres"])
 
-            saves_comments(
-                book_id=book_id,
-                book_name=book["header"],
-                book_comments=book["comments"],
-                folder=paths["comments_path"]
-            )
-
-            saves_genres(
-                book_name=book["header"],
-                book_genres=book["genres"],
-            )
+            })
+            json_path = Path.cwd().joinpath('book_comments_genres.json')
+            with open(json_path, 'w', encoding='utf8') as json_file:
+                json.dump(comments_genres, json_file, ensure_ascii=False, indent=4)
