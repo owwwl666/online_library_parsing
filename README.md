@@ -35,8 +35,10 @@ python parse_tululu.py
 ```
 
 ### Результаты
-![](https://github.com/owwwl666/online_library_parsing/assets/131767856/3ebddc31-6236-4983-b4a9-1a2bce771ea0)
-![](https://github.com/owwwl666/online_library_parsing/assets/131767856/b1393094-4b7a-4199-a1fd-6d36d842dd46)
+Результат работы скрипта в виде скачанных обложек книг:
+
+![image](https://github.com/owwwl666/online_library_parsing/assets/131767856/8de83a80-293d-4c28-889b-95cea7430116)
+
 
 ## parse_tululu_category
 
