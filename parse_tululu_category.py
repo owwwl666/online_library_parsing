@@ -2,6 +2,7 @@ import requests
 import json
 import logging
 import time
+import argparse
 from bs4 import BeautifulSoup
 from pathlib import Path
 from urllib.parse import urljoin
@@ -17,6 +18,24 @@ from environs import Env
 env = Env()
 env.read_env()
 
+PAGE_URL = 'https://tululu.org/l55/'
+response = requests.get(PAGE_URL)
+html_content = BeautifulSoup(response.text, 'lxml')
+last_page = int(html_content.select('.npage')[-1].text)
+
+parser = argparse.ArgumentParser(
+    description="Парсинг онлайн-библиотеки https://tululu.org/. "
+                "Скрипт обрабатывает заданные пользователем страницы с книгами"
+                "Скачивает всю имеющуюся на этих страницах литературу"
+                "и сохраняет локально запрошенную пользователем информацию о кажжой книге:"
+                "название, автора, обложку, жанр, текст книги и т.д.")
+parser.add_argument("--start_page", type=int, required=False, default=1,
+                    help="Целочисленный аргумент (начальная страница)")
+parser.add_argument("--end_page", type=int, required=False, default=last_page,
+                    help="Целочисленный аргумент (конечная страница)")
+
+args = parser.parse_args()
+
 paths = {
     "books_path": env.str("BOOKS"),
     "images_path": env.str("IMAGES"),
@@ -27,10 +46,9 @@ for path in paths:
     Path(paths[path]).mkdir(parents=True, exist_ok=True)
 books_all_pages = []
 
-for page in range(1, 2):
+for page in range(args.start_page, args.end_page + 1):
     try:
-        page_url = f'https://tululu.org/l55/{page}/'
-        response = requests.get(page_url)
+        response = requests.get(f'{PAGE_URL}{page}')
     except requests.exceptions.HTTPError:
         logging.error(f'{page}-ой страницы не существует')
     except requests.exceptions.ConnectionError:
