@@ -16,11 +16,45 @@ from parse_tululu import check_for_redirect
 
 PAGE_URL = 'https://tululu.org/l55/'
 
-if __name__ == '__main__':
-    response = requests.get(PAGE_URL)
+
+def get_last_page_number(url):
+    """Получает последний номер страницы."""
+    response = requests.get(url)
     response.raise_for_status()
     html_content = BeautifulSoup(response.text, 'lxml')
-    last_page = int(html_content.select('.npage')[-1].text)
+    return int(html_content.select('.npage')[-1].text)
+
+
+def save_information_books(path, filename, books):
+    """Сохраняет информацию о книгах в json файл."""
+    json_path = Path(path).joinpath(filename)
+    with open(json_path, 'w', encoding='utf8') as json_file:
+        json.dump(books, json_file, ensure_ascii=False, indent=4)
+
+
+def collect_information_book(html_content_book, book_url, book_path):
+    """Собирает информацию о книге. """
+    book = parse_book_page(html_content_book, book_url)
+
+    title = book['header']
+    author = book['author']
+    image = book['cover']
+    path = str(Path(book_path).joinpath(book['header']))
+    comments = get_comments(book['comments'])
+    genres = get_genres(book['genres'])
+
+    return {
+        'title': title,
+        'author': author,
+        'img_src': image,
+        'book_path': path,
+        'comments': comments,
+        'genres': genres
+    }
+
+
+if __name__ == '__main__':
+    last_page = get_last_page_number(PAGE_URL)
 
     parser = argparse.ArgumentParser(
         description="Парсинг онлайн-библиотеки https://tululu.org/. "
@@ -32,7 +66,7 @@ if __name__ == '__main__':
                         help="Целочисленный аргумент (начальная страница)")
     parser.add_argument("--end_page", type=int, required=False, default=last_page,
                         help="Целочисленный аргумент (конечная страница)")
-    parser.add_argument("--dest_folder", required=False, type=str,
+    parser.add_argument("--dest_folder", required=False, type=str, default=Path.cwd(),
                         help="Путь к каталогу с результатами парсинга:(по-умолчанию корень проекта)")
     parser.add_argument("--skip_imgs", help='Не скачивать обложки книги', action="store_true")
     parser.add_argument("--skip_txt", help='Не скачивать текст книги', action="store_true")
@@ -40,16 +74,13 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     paths = {
-        "books_path": Path(args.dest_folder).joinpath('books_text') if args.dest_folder else Path.cwd().joinpath(
-            'books_text'),
-        "images_path": Path(args.dest_folder).joinpath('book_images') if args.dest_folder else Path.cwd().joinpath(
-            'book_images'),
+        "books_path": Path(args.dest_folder).joinpath('books_text'),
+        "images_path": Path(args.dest_folder).joinpath('book_images'),
     }
+    all_books = []
 
     for path in paths:
         Path(paths[path]).mkdir(parents=True, exist_ok=True)
-
-    all_books = []
 
     for page in range(args.start_page, args.end_page + 1):
         try:
@@ -80,10 +111,14 @@ if __name__ == '__main__':
 
                     html_content_book = response.text
 
-                    parse_book = parse_book_page(html_content_book, book_url)
+                    book_ = collect_information_book(
+                        html_content_book,
+                        book_url,
+                        paths['books_path']
+                    )
                     if not args.skip_imgs:
                         saves_image(
-                            parse_book["cover"],
+                            book_['img_src'],
                             paths['images_path']
                         )
 
@@ -97,32 +132,14 @@ if __name__ == '__main__':
                         saves_txt(
                             book_txt_response.content,
                             book_id,
-                            parse_book['header'],
+                            book_['title'],
                             paths['books_path']
                         )
 
-                    book_comments_path = get_comments(
-                        parse_book["comments"],
-                    )
+                    all_books.append(book_)
 
-                    book_genres_path = get_genres(
-                        parse_book['genres'],
-                    )
-
-                    all_books.append(
-                        {
-                            'title': parse_book["header"],
-                            'author': parse_book['author'],
-                            'img_src': parse_book['cover'],
-                            'book_path': str(
-                                Path(paths['books_path']).joinpath(
-                                    parse_book['header'])) if not args.skip_txt else None,
-                            'comments': book_comments_path,
-                            'genres': book_genres_path
-                        }
-                    )
-
-    json_path = Path(args.dest_folder).joinpath('books.json') if args.dest_folder else Path.cwd().joinpath(
-        'books.json')
-    with open(json_path, 'w', encoding='utf8') as json_file:
-        json.dump(all_books, json_file, ensure_ascii=False, indent=4)
+    save_information_books(
+        args.dest_folder,
+        'books.json',
+        all_books
+    )
