@@ -105,6 +105,7 @@ if __name__ == '__main__':
                     response = requests.get(book_url, allow_redirects=False)
                     book_txt_response = requests.get(book_download_link, allow_redirects=False, params={"id": book_id})
 
+                    response.raise_for_status()
                     book_txt_response.raise_for_status()
                     check_for_redirect(book_txt_response.is_redirect)
                     check_for_redirect(response.is_redirect)
