@@ -84,8 +84,9 @@ if __name__ == '__main__':
 
     for page in range(args.start_page, args.end_page + 1):
         try:
-            response = requests.get(f'{PAGE_URL}{page}')
+            response = requests.get(f'{PAGE_URL}{page}',allow_redirects=False)
             response.raise_for_status()
+            check_for_redirect(response.is_redirect)
         except requests.exceptions.HTTPError:
             logging.error(f'{page}-ой страницы не существует')
         except requests.exceptions.ConnectionError:
