@@ -31,27 +31,6 @@ def save_information_books(path, filename, books):
         json.dump(books, json_file, ensure_ascii=False, indent=4)
 
 
-def collect_information_book(html_content_book, book_url, book_path):
-    """Собирает информацию о книге. """
-    book = parse_book_page(html_content_book, book_url)
-
-    title = book['header']
-    author = book['author']
-    image = book['cover']
-    path = str(Path(book_path).joinpath(book['header']))
-    comments = get_comments(book['comments'])
-    genres = get_genres(book['genres'])
-
-    return {
-        'title': title,
-        'author': author,
-        'img_src': image,
-        'book_path': path,
-        'comments': comments,
-        'genres': genres
-    }
-
-
 if __name__ == '__main__':
     last_page = get_last_page_number(PAGE_URL)
 
@@ -110,14 +89,13 @@ if __name__ == '__main__':
 
                     html_content_book = response.text
 
-                    book_ = collect_information_book(
+                    book_ = parse_book_page(
                         html_content_book,
-                        book_url,
-                        paths['books_path']
+                        book_url
                     )
                     if not args.skip_imgs:
                         saves_image(
-                            book_['img_src'],
+                            book_['cover'],
                             paths['images_path']
                         )
 
@@ -131,11 +109,19 @@ if __name__ == '__main__':
                         saves_txt(
                             book_txt_response.content,
                             book_id,
-                            book_['title'],
+                            book_['header'],
                             paths['books_path']
                         )
-
-                    all_books.append(book_)
+                    all_books.append(
+                        {
+                            'title': book_['header'],
+                            'author': book_['author'],
+                            'img_src': book_['cover'],
+                            'book_path': str(paths['books_path']),
+                            'comments': get_comments(book_['comments']),
+                            'genres': get_genres(book_['genres'])
+                        }
+                    )
 
     save_information_books(
         args.dest_folder,
