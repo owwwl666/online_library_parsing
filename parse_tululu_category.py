@@ -5,7 +5,6 @@ import time
 import argparse
 from bs4 import BeautifulSoup
 from pathlib import Path
-from urllib.parse import urljoin
 from urllib.parse import urlparse
 from parse_tululu import parse_book_page
 from parse_tululu import saves_txt
@@ -84,7 +83,7 @@ if __name__ == '__main__':
 
     for page in range(args.start_page, args.end_page + 1):
         try:
-            response = requests.get(f'{PAGE_URL}{page}',allow_redirects=False)
+            response = requests.get(f'{PAGE_URL}{page}', allow_redirects=False)
             response.raise_for_status()
             check_for_redirect(response.is_redirect)
         except requests.exceptions.HTTPError:
@@ -96,11 +95,9 @@ if __name__ == '__main__':
             soup = BeautifulSoup(response.text, 'lxml')
             books = soup.select('.d_book')
             for book in books:
-                book_url = urljoin(
-                    'https://tululu.org',
-                    book.select_one('a')['href']
-                )
-                book_id = urlparse(book_url).path[2:-1]
+                book_id = urlparse(book.select_one('a')['href']).path[2:-1]
+                book_url = f'https://tululu.org/b{book_id}/'
+
                 book_download_link = f'https://tululu.org/txt.php'
                 try:
                     response = requests.get(book_url, allow_redirects=False)
