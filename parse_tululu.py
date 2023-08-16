@@ -135,6 +135,7 @@ if __name__ == '__main__':
                 'genres': get_genres(book_genres=book["genres"])
 
             })
-            json_path = Path.cwd().joinpath('book_comments_genres.json')
-            with open(json_path, 'w', encoding='utf8') as json_file:
-                json.dump(comments_genres, json_file, ensure_ascii=False, indent=4)
+
+    json_path = Path.cwd().joinpath('book_comments_genres.json')
+    with open(json_path, 'w', encoding='utf8') as json_file:
+        json.dump(comments_genres, json_file, ensure_ascii=False, indent=4)
