@@ -80,11 +80,7 @@ if __name__ == '__main__':
                 book_download_link = f'https://tululu.org/txt.php'
                 try:
                     response = requests.get(book_url, allow_redirects=False)
-                    book_txt_response = requests.get(book_download_link, allow_redirects=False, params={"id": book_id})
-
                     response.raise_for_status()
-                    book_txt_response.raise_for_status()
-                    check_for_redirect(book_txt_response.is_redirect)
                     check_for_redirect(response.is_redirect)
 
                     html_content_book = response.text
@@ -93,25 +89,25 @@ if __name__ == '__main__':
                         html_content_book,
                         book_url
                     )
-                    if not args.skip_imgs:
-                        saves_image(
-                            book_['cover'],
-                            paths['images_path']
-                        )
 
-                except requests.exceptions.HTTPError:
-                    logging.error(f'Книги по {book_id}-ому id не существует')
-                except requests.exceptions.ConnectionError:
-                    logging.error(f'Не установлено соединение с сервером')
-                    time.sleep(10)
-                else:
                     if not args.skip_txt:
+                        book_txt_response = requests.get(book_download_link, allow_redirects=False,
+                                                         params={"id": book_id})
+                        book_txt_response.raise_for_status()
+                        check_for_redirect(book_txt_response.is_redirect)
                         saves_txt(
                             book_txt_response.content,
                             book_id,
                             book_['header'],
                             paths['books_path']
                         )
+
+                    if not args.skip_imgs:
+                        saves_image(
+                            book_['cover'],
+                            paths['images_path']
+                        )
+
                     all_books.append(
                         {
                             'title': book_['header'],
@@ -122,6 +118,12 @@ if __name__ == '__main__':
                             'genres': get_genres(book_['genres'])
                         }
                     )
+
+                except requests.exceptions.HTTPError:
+                    logging.error(f'Книги по {book_id}-ому id не существует')
+                except requests.exceptions.ConnectionError:
+                    logging.error(f'Не установлено соединение с сервером')
+                    time.sleep(10)
 
     save_information_books(
         args.dest_folder,
