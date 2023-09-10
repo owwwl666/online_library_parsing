@@ -1,6 +1,5 @@
-from http.server import HTTPServer, SimpleHTTPRequestHandler
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from livereload import Server, shell
+from livereload import Server
 from pathlib import Path
 import json
 
