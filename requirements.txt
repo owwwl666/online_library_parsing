@@ -3,3 +3,5 @@ beautifulsoup4==4.12.2
 lxml==4.9.3
 pathvalidate==3.1.0
 environs==9.5.0
+Jinja2==3.1.2
+livereload==2.6.3
