@@ -44,7 +44,7 @@ if __name__ == '__main__':
                         help="Целочисленный аргумент (начальная страница)")
     parser.add_argument("--end_page", type=int, required=False, default=last_page,
                         help="Целочисленный аргумент (конечная страница)")
-    parser.add_argument("--dest_folder", required=False, type=str, default=Path.cwd(),
+    parser.add_argument("--dest_folder", required=False, type=str, default="",
                         help="Путь к каталогу с результатами парсинга:(по-умолчанию корень проекта)")
     parser.add_argument("--skip_imgs", help='Не скачивать обложки книги', action="store_true")
     parser.add_argument("--skip_txt", help='Не скачивать текст книги', action="store_true")
