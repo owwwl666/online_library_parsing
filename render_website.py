@@ -13,15 +13,20 @@ def on_reload():
 
     template = env.get_template('template.html')
     path = Path.cwd().joinpath('books.json')
+    Path('pages').mkdir(parents=True, exist_ok=True)
 
     with open(path, 'r', encoding='utf8') as json_file:
         books = json.load(json_file)
 
-    rendered_page = template.render(
-        books=list(chunked(books, 2))
-    )
-    with open('index.html', 'w', encoding="utf8") as file:
-        file.write(rendered_page)
+    book_pages = list(chunked(books, 10))
+
+    for page_index, page in enumerate(book_pages):
+        page_path = Path('pages').joinpath(f'index{page_index+1}.html')
+        rendered_page = template.render(
+            books=list(chunked(page, 2))
+        )
+        with open(page_path, 'w', encoding="utf8") as file:
+            file.write(rendered_page)
 
 
 if __name__ == '__main__':
