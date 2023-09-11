@@ -19,11 +19,16 @@ def on_reload():
         books = json.load(json_file)
 
     book_pages = list(chunked(books, 10))
+    pages_count = len(book_pages)
+    pages_range = range(1, len(book_pages) + 1)
 
-    for page_index, page in enumerate(book_pages):
-        page_path = Path('pages').joinpath(f'index{page_index+1}.html')
+    for page_number, page in enumerate(book_pages):
+        page_path = Path('pages').joinpath(f'index{page_number + 1}.html')
         rendered_page = template.render(
-            books=list(chunked(page, 2))
+            books=list(chunked(page, 2)),
+            pages_range=pages_range,
+            pages_count=pages_count,
+            current_page=page_number + 1,
         )
         with open(page_path, 'w', encoding="utf8") as file:
             file.write(rendered_page)

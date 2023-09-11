@@ -12,6 +12,38 @@
   <title>Онлайн Библиотека</title>
 </head>
 <body>
+
+  <nav aria-label="Page navigation example">
+    <ul class="pagination justify-content-center">
+      {% if current_page == 1 %}
+        <li class="page-item disabled">
+          <a class="page-link" href="" tabindex="-1" aria-disabled="true">Предыдущая</a>
+        </li>
+      {% else %}
+        <li class="page-item">
+            <a class="page-link" href="index{{current_page-1}}.html" tabindex="-1" aria-disabled="true">Предыдущая</a>
+        </li>
+      {% endif %}
+      {% for page_number in pages_range %}
+        {% if page_number == current_page %}
+          <li class="page-item active"><a class="page-link" href="index{{page_number}}.html">{{page_number}}</a></li>
+        {% else %}
+          <li class="page-item"><a class="page-link" href="index{{page_number}}.html">{{page_number}}<span class="sr-only">{{current_page}}</span></a></li>
+        {% endif %}
+      {% endfor %}
+
+      {% if current_page == pages_count %}
+        <li class="page-item disabled">
+          <a class="page-link" href="">Следующая</a>
+        </li>
+      {% else %}
+        <li class="page-item">
+          <a class="page-link" href="index{{current_page+1}}.html">Следующая</a>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
+
   {% for books_column in books %}
   <div class="container">
     <div class="row justify-content-around">
