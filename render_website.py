@@ -1,4 +1,5 @@
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+from more_itertools import chunked
 from livereload import Server
 from pathlib import Path
 import json
@@ -17,14 +18,14 @@ def on_reload():
         books = json.load(json_file)
 
     rendered_page = template.render(
-        books=books
+        books=list(chunked(books, 2))
     )
     with open('index.html', 'w', encoding="utf8") as file:
         file.write(rendered_page)
 
 
-on_reload()
-
-server = Server()
-server.watch('template.html', on_reload)
-server.serve(root='.')
+if __name__ == '__main__':
+    on_reload()
+    server = Server()
+    server.watch('template.html', on_reload)
+    server.serve(root='.')
