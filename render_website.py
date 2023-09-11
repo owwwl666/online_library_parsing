@@ -3,6 +3,7 @@ from more_itertools import chunked
 from livereload import Server
 from pathlib import Path
 import json
+import argparse
 
 
 def on_reload():
@@ -11,8 +12,15 @@ def on_reload():
         autoescape=select_autoescape(['html', 'xml'])
     )
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--json_path", required=False, type=str, default="",
+                        help="Путь к файлу books.json, который был создан в скрипте parse_tululu_category."
+                             "Если путь раннее не был указан, то файл сохранился в корень проекта.")
+    args = parser.parse_args()
+
     template = env.get_template('template.html')
-    path = Path.cwd().joinpath('books.json')
+
+    path = Path(args.json_path).joinpath('books.json')
     Path('pages').mkdir(parents=True, exist_ok=True)
 
     with open(path, 'r', encoding='utf8') as json_file:
@@ -36,6 +44,7 @@ def on_reload():
 
 if __name__ == '__main__':
     on_reload()
+
     server = Server()
     server.watch('template.html', on_reload)
     server.serve(root='.')
