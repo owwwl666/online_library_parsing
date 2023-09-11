@@ -95,7 +95,7 @@ if __name__ == '__main__':
                                                          params={"id": book_id})
                         book_txt_response.raise_for_status()
                         check_for_redirect(book_txt_response.is_redirect)
-                        saves_txt(
+                        book_text = saves_txt(
                             book_txt_response.content,
                             book_id,
                             book_['header'],
@@ -113,7 +113,7 @@ if __name__ == '__main__':
                             'title': book_['header'],
                             'author': book_['author'],
                             'img_src': book_['cover'],
-                            'book_path': str(paths['books_path']),
+                            'book_path': str(paths['books_path'].joinpath(book_text)),
                             'comments': get_comments(book_['comments']),
                             'genres': get_genres(book_['genres'])
                         }

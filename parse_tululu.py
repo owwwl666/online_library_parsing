@@ -42,9 +42,11 @@ def parse_book_page(html_content, book_link):
 def saves_txt(response, book_id, book_name, folder):
     """Задает путь сохранения текста книги."""
     name = sanitize_filename(book_name)
-    book_path = Path(folder).joinpath(f'{book_id}.{name}.txt')
+    full_book_name = f'{book_id}.{name}.txt'
+    book_path = Path(folder).joinpath(full_book_name)
     with open(book_path, 'wb') as file:
         file.write(response)
+    return full_book_name
 
 
 def saves_image(book_image, folder):
