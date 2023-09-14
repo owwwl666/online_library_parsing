@@ -15,9 +15,9 @@ def on_reload():
     )
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--json_path", required=False, type=str, default="",
-                        help="Путь к файлу books.json, который был создан в скрипте parse_tululu_category."
-                             "Если путь раннее не был указан, то файл сохранился в корень проекта.")
+    parser.add_argument('--json_path', required=False, type=str, default='',
+                        help='Путь к файлу books.json, который был создан в скрипте parse_tululu_category.'
+                             'Если путь раннее не был указан, то файл сохранился в корень проекта.')
     args = parser.parse_args()
 
     template = env.get_template('template.html')
@@ -40,7 +40,7 @@ def on_reload():
             pages_count=pages_count,
             current_page=page_number,
         )
-        with open(page_path, 'w', encoding="utf8") as file:
+        with open(page_path, 'w', encoding='utf8') as file:
             file.write(rendered_page)
 
 
