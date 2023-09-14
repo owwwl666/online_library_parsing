@@ -57,6 +57,7 @@ def saves_image(book_image, folder):
     book_image_path = Path(folder).joinpath(f'{image_name}')
     with open(book_image_path, 'wb') as file:
         file.write(image_download.content)
+    return image_name
 
 
 def get_comments(book_comments):
