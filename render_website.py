@@ -7,6 +7,7 @@ import argparse
 
 AMOUNT_BOOKS_ON_PAGE = 10
 
+
 def on_reload():
     env = Environment(
         loader=FileSystemLoader('.'),
@@ -31,13 +32,13 @@ def on_reload():
     pages_count = len(book_pages)
     pages_range = range(1, len(book_pages) + 1)
 
-    for page_number, page in enumerate(book_pages):
-        page_path = Path('pages').joinpath(f'index{page_number + 1}.html')
+    for page_number, page in enumerate(book_pages, 1):
+        page_path = Path('pages').joinpath(f'index{page_number}.html')
         rendered_page = template.render(
             books=list(chunked(page, 2)),
             pages_range=pages_range,
             pages_count=pages_count,
-            current_page=page_number + 1,
+            current_page=page_number,
         )
         with open(page_path, 'w', encoding="utf8") as file:
             file.write(rendered_page)
