@@ -103,7 +103,7 @@ if __name__ == '__main__':
                         )
 
                     if not args.skip_imgs:
-                        saves_image(
+                        book_img = saves_image(
                             book_['cover'],
                             paths['images_path']
                         )
@@ -112,7 +112,7 @@ if __name__ == '__main__':
                         {
                             'title': book_['header'],
                             'author': book_['author'],
-                            'img_src': book_['cover'],
+                            'img_path': str(paths['images_path'].joinpath(book_img)),
                             'book_path': str(paths['books_path'].joinpath(book_text)),
                             'comments': get_comments(book_['comments']),
                             'genres': get_genres(book_['genres'])
