@@ -5,6 +5,7 @@ from pathlib import Path
 import json
 import argparse
 
+AMOUNT_BOOKS_ON_PAGE = 10
 
 def on_reload():
     env = Environment(
@@ -26,7 +27,7 @@ def on_reload():
     with open(path, 'r', encoding='utf8') as json_file:
         books = json.load(json_file)
 
-    book_pages = list(chunked(books, 10))
+    book_pages = list(chunked(books, AMOUNT_BOOKS_ON_PAGE))
     pages_count = len(book_pages)
     pages_range = range(1, len(book_pages) + 1)
 
